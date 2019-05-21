@@ -17,6 +17,15 @@ function ensureDirectoryExistence(filePath) {
     fs.mkdirSync(dirname);
 }
 
+function checkProps(array, object){
+    array.forEach(a=>{
+        if(!object.hasOwnProperty(a)){
+            error(`Config or flags must include the ${a} property.`)
+        }
+    })
+}
+
+
 module.exports = () => {
     const args = minimist(process.argv.slice(2))
     // console.log('cf args', args)
@@ -25,7 +34,6 @@ module.exports = () => {
     // if(!args.hasOwnProperty('profile')) error('Must include --profile', 1)
     // if(!args.hasOwnProperty('root')) error('Must include --root',1)
     if(!args._[1]) error('Must include action',1)
-    if(args._[1] !== 'setup' && !args.hasOwnProperty('env')) error('Must include --env',1)
 
     console.log(args)
     let { env } = args
@@ -33,17 +41,14 @@ module.exports = () => {
     // let template = config.template
     // let ssl = config.ssl
     options.env = env
-    options.profile = options.aws_profile
-    options.module = options.module_name
-    options.root = options.aws_bucket_root
     options.cf_envs = options.cf_envs || []
-    options.rootenv = options.root_env
 
     let action = args._[1]
 
     switch(action){
         case 'refresh':
-            refreshLocalConfig(options)
+
+            refreshLocalConfig(options,0)
             break;
         case 'setup':
             setup(options)
@@ -66,12 +71,15 @@ module.exports = () => {
 
 }
 
-async function setup({profile,root, ssl, cf_envs, root_env}){
-    let configs = cf_envs.map(env=>{
-        return refreshLocalConfig(profile, root, env)
+async function setup(options,exit){
+    checkProps(['profile', 'domain', 'env', 'ssl', 'rootenv', 'template'],options)
+    let {profile, domain, env, ssl, rootenv, template} = options
+
+    let configs = cf_envs.map(env =>{
+        return refreshLocalConfig(profile, domain, env)
         .then(config=>{
             if(!config.Id){
-                return createCloudfrontFromConfig(profile, root, env, ssl, root_env)
+                return createCloudfrontFromConfig(options, ext)
                 .then(config=>{
                     return Promise.resolve({[env]: config.Id})
                 })
@@ -86,11 +94,11 @@ async function setup({profile,root, ssl, cf_envs, root_env}){
         console.log(configs)
         return configs
     })
-   
 }   
-
  
-async function invalidate({profile,root, env, template},exit){
+async function invalidate(options,exit){
+    checkProps(['profile', 'env', 'template'],options)
+    let {profile, env, template} = options
     var credentials = new AWS.SharedIniFileCredentials({profile});
     AWS.config.credentials = credentials;
     var cloudfront = new AWS.CloudFront();
@@ -109,7 +117,7 @@ async function invalidate({profile,root, env, template},exit){
     }).promise()
     return promise.then(
         function(data) {
-            console.log(data)
+            // console.log(data)
             /* process the data */
         },
         function(err) {
@@ -124,10 +132,11 @@ async function invalidate({profile,root, env, template},exit){
 
 
 
-async function createCloudfrontFromConfig({profile, root, env, ssl, root_env, template}){
+async function createCloudfrontFromConfig(options, exit){
+    checkProps(['profile',  'env', 'ssl', 'rootenv', 'template'],options)
+    let {profile, env, ssl, rootenv, template} = options
     ssl = ssl || null
-    let rootenv = root_env || prod
-    console.log(profile, root, env, ssl, root_env, template)
+    let rootenv = rootenv || prod
     var credentials = new AWS.SharedIniFileCredentials({profile});
     AWS.config.credentials = credentials;
     var cloudfront = new AWS.CloudFront();
@@ -174,21 +183,33 @@ async function createCloudfrontFromConfig({profile, root, env, ssl, root_env, te
     return out
 }
 
-async function refreshLocalConfig({profile,root,env}, exit){
-    let out = await getConfigByDomain(profile,root,env).catch(err=>error(JSON.stringify(err,err.stack),exit))
-    let id = out.Id
-    // console.log(env, out)
-    ensureDirectoryExistence(`.stackpack/${template}/cloudfront-config-${env}.json`)
-    fs.writeFileSync(`.stackpack/${template}/cloudfront-config-${env}.json`, JSON.stringify(out)); 
-    // console.log(out)
-    return out
+async function refreshLocalConfig(options, exit){
+    checkProps(['ssl', 'rootenv', 'template'],options)
+    let {env, template, cf_envs} = options
+    // console.log(cf_envs)
+    if(env) {cf_envs = [env]}
+    // console.log(cf_envs)
+    return cf_envs.map(async env => {
+        // console.log(env)
+        let out = await getConfigByDomain({...options, env}, exit).catch(err=>error(JSON.stringify(err,err.stack),exit))
+        let id = out.Id
+        if(out){
+            ensureDirectoryExistence(`.stackpack/${template}/cloudfront-config-${env}.json`)
+            fs.writeFileSync(`.stackpack/${template}/cloudfront-config-${env}.json`, JSON.stringify(out)); 
+        }
+        return out
+    })
 }
 
-function getConfigByDomain({profile, root, env, template}, exit){
+function getConfigByDomain(options, exit){
+    checkProps(['profile',  'env' ],options)
+    let {profile, env, domain } = options
+    // console.log(profile)
     var credentials = new AWS.SharedIniFileCredentials({profile});
     AWS.config.credentials = credentials;
     var cloudfront = new AWS.CloudFront();
     let promise = cloudfront.listDistributions({}).promise()
+    // console.log(env, domain)
     return promise.then(
         function(data) {
             // console.log(data)
@@ -197,7 +218,8 @@ function getConfigByDomain({profile, root, env, template}, exit){
             let match = false
             list.forEach(item=>{
                 // console.log(item)
-                let fullDomain = `${env}-${root}`
+                let fullDomain = `${env}-${domain}`
+                // console.log(item.Aliases.Items)
                 if(item && item.Aliases && item.Aliases.Items && item.Aliases.Items.includes(fullDomain)){
                     // console.log(item.Id)
                     match = item
@@ -215,14 +237,16 @@ function getConfigByDomain({profile, root, env, template}, exit){
     ).catch(err=>error(JSON.stringify(err,err.stack),exit))
 }
 
-async function updateConfigFromLocal({profile, root, env, template}){
+async function updateConfigFromLocal(options,exit){
+    checkProps(['profile', 'env',  'template'],options)
+    let {profile, env, template} = options
     var credentials = new AWS.SharedIniFileCredentials({profile});
     AWS.config.credentials = credentials;
     var cloudfront = new AWS.CloudFront();
 
     ensureDirectoryExistence(`.stackpack/${template}/cloudfront-config-${env}.json`)
     let newConfig = JSON.parse(fs.readFileSync(`.stackpack/${template}/cloudfront-config-${env}.json`, 'utf8'));
-    let etag = await getConfigByDomain(profile, root, env)
+    let etag = await getConfigByDomain(options,exit)
 
 
     let promise = cloudfront.updateDistribution({DistributionConfig:newConfig, Id:newConfig.Id, IfMatch:etag}).promise()

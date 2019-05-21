@@ -16,26 +16,6 @@
     "minimist": "^1.2.0",
     "shelljs": "^0.8.3"
   },
-  "stackpack": {
-    "ssl": "arn:aws:acm:us-east-1:99999999999:certificate/XXXXXXXXXXXXXXXXXX",
-    "template": "s3-cf-https",
-    "aws_profile": "example-admin",
-    "module_name": "www-example-com",
-    "aws_bucket_root": "www.example.com",
-    "environments": [
-      "develop",
-      "qa",
-      "staging",
-      "prod"
-    ],
-    "cf_envs": [
-      "develop",
-      "qa",
-      "staging",
-      "prod"
-    ],
-    "root_env": "prod"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jamesvillarrubia/stackpack.git"
