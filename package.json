@@ -1,0 +1,43 @@
+{
+  "name": "stackpack",
+  "version": "0.0.1",
+  "description": "A template-based deployment library that bridges the gap between tools like CRA and Serverless and real production stacks.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "bin": {
+    "stackpack": "bin/stackpack"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.458.0",
+    "minimist": "^1.2.0",
+    "shelljs": "^0.8.3"
+  },
+  "stackpack": {
+    "ssl": "arn:aws:acm:us-east-1:99999999999:certificate/XXXXXXXXXXXXXXXXXX",
+    "template": "s3-cf-https",
+    "aws_profile": "example-admin",
+    "module_name": "www-example-com",
+    "aws_bucket_root": "www.example.com",
+    "environments": [
+      "develop",
+      "qa",
+      "staging",
+      "prod"
+    ],
+    "cf_envs": [
+      "develop",
+      "qa",
+      "staging",
+      "prod"
+    ],
+    "root_env": "prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jamesvillarrubia/stackpack.git"
+  }
+}

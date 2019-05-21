@@ -1,0 +1,121 @@
+{
+    "CallerReference": "${DEPLOY_ENV}-${AWS_BUCKET_ROOT}",
+    "Aliases": {
+        "Quantity": 1,
+        "Items": [
+            "${DEPLOY_ENV}-${AWS_BUCKET_ROOT}"
+        ]
+    },
+    "DefaultRootObject": "index.html",
+    "Origins": {
+        "Quantity": 1,
+        "Items": [
+            {
+                "Id": "S3-${DEPLOY_ENV}-${AWS_BUCKET_ROOT}",
+                "DomainName": "${DEPLOY_ENV}-${AWS_BUCKET_ROOT}.s3.amazonaws.com",
+                "OriginPath": "",
+                "CustomHeaders": {
+                    "Quantity": 2,
+                    "Items": [
+                      {
+                        "HeaderName": "Content-Security-Policy",
+                        "HeaderValue": "frame-ancestors 'none'"
+                      },
+                      {
+                      "HeaderName": "X-Frame-Options",
+                      "HeaderValue": "DENY"
+                      }
+                    ]
+                },
+                "S3OriginConfig": {
+                    "OriginAccessIdentity": ""
+                }
+            }
+        ]
+    },
+    "DefaultCacheBehavior": {
+        "TargetOriginId": "S3-${DEPLOY_ENV}-${AWS_BUCKET_ROOT}",
+        "ForwardedValues": {
+            "QueryString": false,
+            "Cookies": {
+                "Forward": "none"
+            },
+            "Headers": {
+                "Quantity": 0
+            },
+            "QueryStringCacheKeys": {
+                "Quantity": 0
+            }
+        },
+        "TrustedSigners": {
+            "Enabled": false,
+            "Quantity": 0
+        },
+        "ViewerProtocolPolicy": "redirect-to-https",
+        "MinTTL": 0,
+        "AllowedMethods": {
+            "Quantity": 2,
+            "Items": [
+                "HEAD",
+                "GET"
+            ],
+            "CachedMethods": {
+                "Quantity": 2,
+                "Items": [
+                    "HEAD",
+                    "GET"
+                ]
+            }
+        },
+        "SmoothStreaming": false,
+        "DefaultTTL": 86400,
+        "MaxTTL": 31536000,
+        "Compress": false,
+        "LambdaFunctionAssociations": {
+            "Quantity": 0
+        }
+    },
+    "CacheBehaviors": {
+        "Quantity": 0
+    },
+    "CustomErrorResponses": {
+        "Quantity": 2,
+        "Items": [
+            {
+                "ErrorCode": 403,
+                "ResponsePagePath": "/index.html",
+                "ResponseCode": "200",
+                "ErrorCachingMinTTL": 300
+            },
+            {
+                "ErrorCode": 404,
+                "ResponsePagePath": "/index.html",
+                "ResponseCode": "200",
+                "ErrorCachingMinTTL": 300
+            }
+        ]
+    },
+    "Comment": "",
+    "Logging": {
+        "Enabled": false,
+        "IncludeCookies": false,
+        "Bucket": "",
+        "Prefix": ""
+    },
+    "PriceClass": "PriceClass_All",
+    "Enabled": true,
+    "ViewerCertificate": {
+        "SSLSupportMethod": "sni-only",
+        "MinimumProtocolVersion": "TLSv1.1_2016",
+        "Certificate": "${DEPLOY_SSL_ARN}",
+        "CertificateSource": "acm"
+    },
+    "Restrictions": {
+        "GeoRestriction": {
+            "RestrictionType": "none",
+            "Quantity": 0
+        }
+    },
+    "HttpVersion": "http2",
+    "IsIPV6Enabled": true
+  }

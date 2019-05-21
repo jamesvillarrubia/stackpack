@@ -1,0 +1,13 @@
+FROM lambci/lambda:build-nodejs8.10
+
+COPY package.json .
+COPY package-lock.json .
+RUN npm install -g react-scripts
+RUN npm install 
+
+COPY . . 
+RUN ls -la
+
+
+
+ENTRYPOINT sh -ac "CI='' source ./.env.${BUILD_NODE_ENV}; npm run build:${BUILD_NODE_ENV};" && sh ./deploy/aws-deploy.sh $AWS_PROFILE $AWS_BUCKET_ROOT $BUILD_NODE_ENV_ABBREV
