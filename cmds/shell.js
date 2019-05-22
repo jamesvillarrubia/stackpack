@@ -56,8 +56,7 @@ module.exports = () => {
             checkGit()
             run(action, options)
             break;
-        case 'skip':
-            // child_process.execFileSync(commandName, [arg1, arg2, ...], {stdio: 'inherit'});
+        case 'gitlab-skip':
             run('gitlab-skip', {...options, 1:options.profile, 2: options.root, 3:options.env})
             break;
         default:
