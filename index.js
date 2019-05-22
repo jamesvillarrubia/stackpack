@@ -15,6 +15,15 @@ module.exports = () => {
       cmd = 'help'
     }
     switch (cmd) {
+      case 'init':
+        require('./cmds/init')(args)
+        break
+      case 'deploy':
+        require('./cmds/deploy')(args)
+        break
+      case 'build':
+        require('./cmds/build')(args)
+        break
       case 'cf':
         require('./cmds/cf')(args)
         break

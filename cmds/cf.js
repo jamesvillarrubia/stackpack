@@ -1,7 +1,7 @@
 
 const minimist = require('minimist')
 const error = require('../utils/error')
-const getPackage = require('../utils/getPackage')
+const getPackage = require('../utils/package').get
 var AWS = require('aws-sdk');
 const fs = require('fs')
 const path = require('path')
@@ -35,7 +35,7 @@ module.exports = () => {
     // if(!args.hasOwnProperty('root')) error('Must include --root',1)
     if(!args._[1]) error('Must include action',1)
 
-    console.log(args)
+    // console.log(args)
     let { env } = args
     let options = getPackage().stackpack
     // let template = config.template

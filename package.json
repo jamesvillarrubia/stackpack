@@ -13,7 +13,10 @@
   },
   "dependencies": {
     "aws-sdk": "^2.458.0",
+    "dotenv": "^8.0.0",
+    "env-cmd": "^9.0.1",
     "minimist": "^1.2.0",
+    "s3-client": "^4.4.2",
     "shelljs": "^0.8.3"
   },
   "repository": {
