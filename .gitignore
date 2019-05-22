@@ -1,2 +1,3 @@
-.stackpack
-node_modules/node_modules/
+!.stackpack
+.stackpack/build
+node_modules
