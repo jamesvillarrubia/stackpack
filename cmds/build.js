@@ -46,7 +46,7 @@ module.exports = async () => {
 
     ensureDirectoryExistence(`./.stackpack/builds/${env}/`)
     checkForEnv(options)
-    shell.exec(`env-cmd ./.env.${options.env} ./node_modules/.bin/react-scripts build; rm -r ./.stackpack/builds/${env}; mv build ./.stackpack/builds/${env}/`)
+    shell.exec(`./node_modules/.bin/env-cmd ./.env.${options.env} ./node_modules/.bin/react-scripts build; rm -r ./.stackpack/builds/${env}; mv build ./.stackpack/builds/${env}/`)
     console.log(`\nBuild created in .stackpack/builds/${env}\n`)
 }
 

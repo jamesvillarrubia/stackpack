@@ -1,6 +1,6 @@
 {
   "name": "stackpack",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "A template-based deployment library that bridges the gap between tools like CRA and Serverless and real production stacks.",
   "main": "index.js",
   "scripts": {
