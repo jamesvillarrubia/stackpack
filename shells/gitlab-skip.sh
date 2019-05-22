@@ -3,18 +3,16 @@ MESSAGE=$(git log --oneline -1)
 REG_MIN="semver:(feature|minor)"
 REG_MAJ="semver:(release|major|breaking)"
 REG_PAT="semver:(patch|fix|hotfix)"
-REG_GF_MAJ="Merge branch 'release"
-REG_GF_MIN="Merge branch 'feature"
-REG_GF_PAT="Merge branch 'hotfix"
-REG_MERGE="Merge branch 'develop"
+REG_RUN="run-gitlab-ci"
 
-if [[ ${MESSAGE} =~ ${REG_MIN} ]] || [[ ${MESSAGE} =~ ${REG_GF_MIN} ]]; then
+
+if [[ ${MESSAGE} =~ ${REG_MIN} ]]; then
     echo ""
-elif [[ ${MESSAGE} =~ ${REG_MAJ} ]] || [[ ${MESSAGE} =~ ${REG_GF_MAJ} ]]; then
+elif [[ ${MESSAGE} =~ ${REG_MAJ} ]]; then
     echo ""
-elif [[ $MESSAGE =~ $REG_PAT ]] || [[ $MESSAGE =~ $REG_GF_PAT ]]; then
+elif [[ $MESSAGE =~ $REG_PAT ]]; then
     echo ""
-elif [[ $MESSAGE =~ $REG_MERGE ]]; then
+elif [[ ${MESSAGE} =~ ${REG_RUN} ]]; then
     echo ""
 else
     echo "No Versioning needed"

@@ -88,7 +88,7 @@ function setupScripts(template){
         case 'gitflow':
             stackObjects["____GIT____"]= "____________________________________________________________________________________________________________________________________________________________________________"
             stackObjects["git:develop"]= "                                         git checkout develop   && git add .                   && git commit --allow-empty                    && git push origin develop;"
-            stackObjects["git:qa"]= "             stackpack shell git-tools stash; git checkout qa        && git merge develop --no-edit && git commit -m '_start-runner' --allow-empty && git push origin qa;         git checkout develop && stackpack shell git-tools unstash;"
+            stackObjects["git:qa"]= "             stackpack shell git-tools stash; git checkout qa        && git merge develop --no-edit && git commit -m 'run-gitlab-ci' --allow-empty && git push origin qa;         git checkout develop && stackpack shell git-tools unstash;"
             stackObjects["git:staging"]= "        stackpack shell git-tools stash; git checkout staging   && git merge qa                                                               && git push origin staging;    git checkout develop && stackpack shell git-tools unstash;"
             stackObjects["git:prod"]= "           stackpack shell git-tools stash; git checkout master    && git merge staging --no-edit && stackpack shell version-prompt              && git push origin master;     git checkout develop && stackpack shell git-tools unstash;"
             break;
