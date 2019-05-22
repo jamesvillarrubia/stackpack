@@ -1,5 +1,6 @@
 
 const minimist = require('minimist')
+const shell = require('shelljs')
 const error = require('../utils/error')
 const getPackage = require('../utils/package').get
 const savePackage = require('../utils/package').save
@@ -77,6 +78,16 @@ function setupScripts(template){
     })
     let stackObjects = {} 
     switch(template){
+        case 's3-cf-https-gitlab':
+            console.log('\n\n\n\n\n***********************************************\nIn order to work with gitlab-ci, you must set the following pipeline variables:\n\n')
+            console.log(' -    GL_AWS_ACCESS_KEY_ID     - Your AWS access key')
+            console.log(' -    GL_AWS_SECRET_ACCESS_KEY - Your AWS secret key')
+            console.log(' -    CI_PERSONAL_TOKEN        - Your CI personal token')
+            console.log('\n The template is now in .gitlab-ci.yml in the root of your project')
+            console.log('\n***********************************************\n\n')
+            let path = require('path')
+            let templatesPath = path.resolve(__dirname,'../templates')
+            shell.mv(`${templatesPath}/s3-cf-https_gitlab-ci.yml`, './.gitlab-ci.yml')
         case 's3-cf-https':
             stackObjects["__DEPLOY___"]= "____________________________________________________________________________________________________________________________________________________________________________"
             envs.forEach((env,i)=>{
@@ -84,6 +95,7 @@ function setupScripts(template){
                 let cf = (cfs.includes(env))? `${spaces}stackpack cf invalidate --env ${env}`:''
                 stackObjects[`deploy:${env}`] = `${spaces}stackpack build --env ${env};${spaces}stackpack deploy --env ${env};${cf}`;
             })
+        
             break;
         case 'gitflow':
             stackObjects["____GIT____"]= "____________________________________________________________________________________________________________________________________________________________________________"
