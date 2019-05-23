@@ -4,14 +4,24 @@
         "presets": ["@babel/preset-env"],
         "plugins": [
           "add-module-exports",
-          "@babel/plugin-proposal-object-rest-spread"
+          "@babel/plugin-proposal-object-rest-spread",
+          ["@babel/plugin-transform-runtime",
+            {
+              "regenerator": true
+            }
+          ]
         ]
       },
       "production": {
         "presets": ["@babel/preset-env", "minify"],
         "plugins": [
           "add-module-exports",
-          "@babel/plugin-proposal-object-rest-spread"
+          "@babel/plugin-proposal-object-rest-spread",
+          ["@babel/plugin-transform-runtime",
+            {
+              "regenerator": true
+            }
+          ]
         ]
       }
     },
