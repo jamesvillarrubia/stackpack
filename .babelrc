@@ -1,0 +1,19 @@
+{
+    "env": {
+      "development": {
+        "presets": ["@babel/preset-env"],
+        "plugins": [
+          "add-module-exports",
+          "@babel/plugin-proposal-object-rest-spread"
+        ]
+      },
+      "production": {
+        "presets": ["@babel/preset-env", "minify"],
+        "plugins": [
+          "add-module-exports",
+          "@babel/plugin-proposal-object-rest-spread"
+        ]
+      }
+    },
+    "plugins": ["@babel/plugin-proposal-object-rest-spread"]
+  }
