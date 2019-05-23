@@ -6,7 +6,7 @@ const getPackage = require('../utils/package').get
 var AWS = require('aws-sdk');
 const fs = require('fs')
 const path = require('path')
-const ensureDirectoryExistence = require('../utils/file-exists')
+const ensureDirectoryExistence = require('../utils/dir-exists')
 
 
 
