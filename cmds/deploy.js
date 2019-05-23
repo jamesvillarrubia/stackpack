@@ -6,6 +6,7 @@ var AWS = require('aws-sdk');
 const fs = require('fs')
 const path = require('path')
 const defaultPolicy = require('../templates/public_permissions.json')
+const ensureDirectoryExistence = require('../utils/file-exists')
 
 
 function ensureDirectoryExistence(filePath) {

@@ -8,6 +8,7 @@ var AWS = require('aws-sdk');
 const fs = require('fs')
 const path = require('path')
 const defaultConfig = require('../templates/s3-cf-https_default-config.json')
+const ensureDirectoryExistence = require('../utils/file-exists')
 
 
 
@@ -94,7 +95,9 @@ function setupScripts(template){
                 let spaces = ("                    ").slice(0, 5 + maxlength-env.length)
                 let cf = (cfs.includes(env))? `${spaces}stackpack cf invalidate --env ${env}`:''
                 stackObjects[`deploy:${env}`] = `${spaces}stackpack build --env ${env};${spaces}stackpack deploy --env ${env};${cf}`;
+                ensureDirectoryExistence(`./.env.${env}`)
             })
+
         
             break;
         case 'gitflow':

@@ -8,6 +8,7 @@ const path = require('path')
 const defaultConfig = require('../templates/s3-cf-https_default-config.json')
 const paths = require('../utils/paths')
 const child_process = require('child_process')
+const ensureDirectoryExistence = require('../utils/file-exists')
 
 
 

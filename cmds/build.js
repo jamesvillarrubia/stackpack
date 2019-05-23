@@ -6,15 +6,9 @@ const getPackage = require('../utils/package').get
 var AWS = require('aws-sdk');
 const fs = require('fs')
 const path = require('path')
+const ensureDirectoryExistence = require('../utils/file-exists')
 
-function ensureDirectoryExistence(filePath) {
-    var dirname = path.dirname(filePath);
-    if (fs.existsSync(dirname)) {
-      return true;
-    }
-    ensureDirectoryExistence(dirname);
-    fs.mkdirSync(dirname);
-}
+
 
 function checkProps(array, object){
     array.forEach(a=>{
