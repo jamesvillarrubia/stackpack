@@ -6,29 +6,16 @@
  * LICENSE file in the root directory of this source tree.
  */
 // @remove-on-eject-end
-'use strict';
+
 
 const path = require('path');
 const fs = require('fs');
-const url = require('url');
 
 // Make sure any symlinks in the project folder are resolved:
 // https://github.com/facebook/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd());
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath);
 
-const envPublicUrl = process.env.PUBLIC_URL;
-
-function ensureSlash(inputPath, needsSlash) {
-  const hasSlash = inputPath.endsWith('/');
-  if (hasSlash && !needsSlash) {
-    return inputPath.substr(0, inputPath.length - 1);
-  } else if (!hasSlash && needsSlash) {
-    return `${inputPath}/`;
-  } else {
-    return inputPath;
-  }
-}
 
 // config after eject: we're in ./config/
 module.exports = {
@@ -50,6 +37,3 @@ module.exports = {
   resolveApp,
 //   resolveFn
 };
-
-// @remove-on-eject-begin
-const resolveOwn = relativePath => path.resolve(__dirname, '..', relativePath);
