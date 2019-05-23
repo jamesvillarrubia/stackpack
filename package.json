@@ -1,6 +1,6 @@
 {
   "name": "stackpack",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A template-based deployment library that bridges the gap between tools like CRA and Serverless and real production stacks.",
   "main": "./lib/index.js",
   "scripts": {
@@ -12,7 +12,7 @@
     "test:examples": "node examples/",
     "cover": "nyc --check-coverage npm run test:only",
     "lint": "eslint src test",
-    "build": "cross-env BABEL_ENV=production babel src --out-dir lib",
+    "build": "cross-env BABEL_ENV=production ./node_modules/.bin/babel src --out-dir lib --copy-files",
     "prepublish": "npm run clean && npm run lint && npm run test && npm run build"
   },
   "author": "James Villarrubia <james.villarrubia@gmail.com>",
@@ -44,6 +44,7 @@
     "url": "https://github.com/jamesvillarrubia/stackpack/issues"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
