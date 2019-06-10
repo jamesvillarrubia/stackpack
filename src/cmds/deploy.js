@@ -13,7 +13,10 @@ const defaultPolicy = require('../templates/public_permissions.json');
 
 function checkProps(array, object) {
   array.forEach((a) => {
-    if (!object.a) {
+    // console.log(a, !object.hasOwnProperty(a));
+    // eslint-disable-next-line no-prototype-builtins
+    if (!object.hasOwnProperty(a)) {
+      // console.log(object, a, !object.a);
       error(`Config or flags must include the ${a} property.`);
     }
   });
@@ -135,9 +138,11 @@ async function sendToBucket(options = {}) {
     console.error('unable to sync:', err.stack);
   });
   uploader.on('progress', () => {
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(`progress ${uploader.progressAmount}, ${uploader.progressTotal}`);
+    if (process.stdout.isTTY) {
+      process.stdout.clearLine();
+      process.stdout.cursorTo(0);
+      process.stdout.write(`progress ${uploader.progressAmount}, ${uploader.progressTotal}`);
+    }
   });
   uploader.on('end', () => {
     console.log('\ndone uploading');
@@ -151,6 +156,7 @@ module.exports = async () => {
   const options = getPackage().stackpack;
   options.env = env;
   options.cf_envs = options.cf_envs || [];
+  options.profile = 'default';
 
   const bucket = await checkS3forBucket(options, 1);
   if (!bucket) {

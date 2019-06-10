@@ -1,6 +1,6 @@
 {
   "name": "stackpack",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "A template-based deployment library that bridges the gap between tools like CRA and Serverless and real production stacks.",
   "main": "./lib/index.js",
   "scripts": {
@@ -50,6 +50,7 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/register": "^7.4.4",
+    "@babel/runtime": "^7.4.5",
     "babel-eslint": "^10.0.1",
     "babel-plugin-add-module-exports": "^1.0.0",
     "babel-polyfill": "^6.26.0",
