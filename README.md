@@ -7,18 +7,20 @@
 This module assumes a few things:
 
 1. You are using AWS for your deployments and caching
-2. You have a default aws profile (secret keys) configured for your terminal or bash.  You can alter the name of the default profile in the package.json under stackpack config with ```profile: "profile-name"```.  This profile should have permissions on S3 and Cloudfront.
-3. You have added the domain name you want to use to route53 and, if using your own cert, have created that cert and ARN
-4. You have installed Docker.
+2. You are deploying a create-react-app app and building with react-scripts
+3. You have a default aws profile (secret keys) configured for your terminal or bash.  You can alter the name of the default profile in the package.json under stackpack config with ```profile: "profile-name"```.  This profile should have permissions on S3 and Cloudfront.
+4. You have added the domain name you want to use to route53 and, if using your own cert, have created that cert and ARN
+5. You have installed Docker.
 
 
 ## Getting started / Installation
 
+1. ```git branch develop``` (may already exist)
 1. ```npm install -g stackpack```
 2. ```stackpack init s3-cf-https```
 3. Open up package.json and edit the stackpack section.  Change the domain name to your domain of choice. Change the aws profile name if necessary. 
 4. ```stackpack cf setup```
-5. Run
+5. Run the following commands for your respective env
    ```
    npm run deploy:develop
    ``` 
@@ -36,7 +38,7 @@ This means that you can go from create-react-app to a deployed, cloudfront-cache
 
 ## Why?
 
-Every time I built a new mvp application, I was always copying and pasting the same deployment scripts. This essentially just bundles them all up into various templates so that the interface to the end user is very, very simple.  This removes the need for a lot of devops for small projects, and get devops up and running for you.  Cloudformation can do some of this, but that can be complicated or overkill.  This is meant to be turn-key devops for small javascript project teams.
+Every time I built a new mvp application, I was always copying and pasting the same deployment scripts. This essentially just bundles them all up into various templates so that the interface to the end user is very, very simple.  This removes the need for a lot of devops for small projects, and get devops up and running for you.  Cloudformation can do some of this, but that can be complicated or overkill.  This is meant to be turn-key devops for small javascript project teams that don't want to dig deep into the various configuration tools (Serverless, Cloudformation, etc.), but do want a uniform deployment flow.
 
 ## Templates
 
@@ -51,6 +53,9 @@ _Note: Templates will not overwrite existing code or files, so if you need to re
 - ```stackpack init gitflow```
   - Adds a standard git deployment flow with environments: develop, qa, staging, production/prod/master
   - See section *Using Gitflow*
+- COMING ```stackpack init beanstalk``` (same api, with beanstalk guts and docker bundling)
+- COMING ```stackpack init lambda``` (same api, with serverless guts and docker bundling)
+
   
 ## First deployment
 
