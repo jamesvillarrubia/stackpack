@@ -2,17 +2,35 @@
 
 [![Build Status](https://travis-ci.org/jamesvillarrubia/stackpack.svg?branch=master)](https://travis-ci.org/jamesvillarrubia/stackpack) [![dependencies Status](https://david-dm.org/jamesvillarrubia/stackpack/status.svg)](https://david-dm.org/jamesvillarrubia/stackpack) [![devDependencies Status](https://david-dm.org/jamesvillarrubia/stackpack/dev-status.svg)](https://david-dm.org/jamesvillarrubia/stackpack?type=dev) [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
+## PREREQUISITES
+
+This module assumes a few things:
+
+1. You are using AWS for your deployments and caching
+2. You have a default aws profile (secret keys) configured for your terminal or bash.  You can alter the name of the default profile in the package.json under stackpack config with ```profile: "profile-name"```.  This profile should have permissions on S3 and Cloudfront.
+3. You have added the domain name you want to use to route53 and, if using your own cert, have created that cert and ARN
+4. You have installed Docker.
+
+
 ## Getting started / Installation
 
-First ```npm install -g stackpack```
+1. ```npm install -g stackpack```
+2. ```stackpack init s3-cf-https```
+3. Open up package.json and edit the stackpack section.  Change the domain name to your domain of choice. Change the aws profile name if necessary. 
+4. ```stackpack cf setup```
+5. Run
+   ```
+   npm run deploy:develop
+   ``` 
+   or
+   ```
+   stackpack build --env develop; stackpack deploy --env develop; stackpack cf invalidate --env develop
+   ```
 
-Then ```stackpack init s3-cf-https```
-
-Make sure you have a default aws profile configured for your terminal or bash
 
 ## How it works
 
-Stackpack setups a standard set of deployment packages that combine very common tools (cra, serverless, gitlab) with git related branches (develop,qa,staging,prod) onto a series of common devops assets (S3, cloudfront, route53, beanstalk, lambda).
+Stackpack setups a standard set of deployment packages that combine very common tools (cra, serverless, gitlab) with git related branches (develop, qa, staging, prod) onto a series of common devops assets (S3, cloudfront, route53, beanstalk, lambda).
 
 This means that you can go from create-react-app to a deployed, cloudfront-cached, S3-hosted app in under 2 minutes (not counting cloudfront roll out time).
 
