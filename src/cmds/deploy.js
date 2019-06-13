@@ -152,11 +152,11 @@ async function sendToBucket(options = {}) {
 
 module.exports = async () => {
   const args = minimist(process.argv.slice(2));
-  const { env } = args;
+  const { env, profile } = args;
   const options = getPackage().stackpack;
   options.env = env;
+  options.profile = profile || options.profile || 'default';
   options.cf_envs = options.cf_envs || [];
-  options.profile = 'default';
 
   const bucket = await checkS3forBucket(options, 1);
   if (!bucket) {

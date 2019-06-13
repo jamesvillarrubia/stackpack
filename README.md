@@ -13,14 +13,22 @@ This module assumes a few things:
 5. You have installed Docker.
 
 
+## Quickstart
+```
+npx create-react-app test-stack
+cd test-stack
+npm install --save-dev stackpack
+``` 
+
+
 ## Getting started / Installation
 
 1. ```git branch develop``` (may already exist)
-1. ```npm install -g stackpack```
-2. ```stackpack init s3-cf-https```
-3. Open up package.json and edit the stackpack section.  Change the domain name to your domain of choice. Change the aws profile name if necessary. 
-4. ```stackpack cf setup```
-5. Run the following commands for your respective env
+2. ```npm install -g stackpack```
+3. ```stackpack init s3-cf-https```
+4. Open up package.json and edit the stackpack section.  Change the domain name to your domain of choice. Change the aws profile name if necessary. 
+5. ```stackpack cf setup```
+6. Run the following commands for your respective env
    ```
    npm run deploy:develop
    ``` 

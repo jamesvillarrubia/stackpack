@@ -13,7 +13,8 @@ const ensureDirectoryExistence = require('../utils/dir-exists');
 
 function checkProps(array, object) {
   array.forEach((a) => {
-    if (!object.a) {
+    // eslint-disable-next-line no-prototype-builtins
+    if (!object.hasOwnProperty(a)) {
       error(`Config or flags must include the ${a} property.`);
     }
   });
@@ -95,10 +96,13 @@ async function invalidate(options, exit) {
     }
   }).promise();
   return promise.then(
-    data => data,
+    (data) => {
+      console.log('invalidating');
+      return data;
+    },
     (err) => {
       /* handle the error */
-      // console.log(err, err.stack);
+      console.log(err, err.stack);
       error(JSON.stringify(err, err.stack), exit);
     }
   ).catch(err => error(JSON.stringify(err, err.stack), exit));
@@ -216,11 +220,13 @@ module.exports = () => {
   // if(!args.hasOwnProperty('root')) error('Must include --root',1)
   if (!args._[1]) error('Must include action', 1);
 
-  // console.log(args)
-  const { env } = args;
+  // console.log(args);
+  const { env, profile } = args;
   const options = getPackage().stackpack;
+  // console.log('stackpack options', options);
   // let template = config.template
   // let ssl = config.ssl
+  options.profile = profile || options.profile || 'default';
   options.env = env;
   options.cf_envs = options.cf_envs || [];
 
