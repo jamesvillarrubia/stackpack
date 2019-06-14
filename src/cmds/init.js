@@ -79,6 +79,7 @@ function setupScripts(_template) {
       shell.mv(`${templatesPath}/s3-cf-https_gitlab-ci.yml`, './.gitlab-ci.yml');
     // disable-eslint-line no-fallthrough
     case 's3-cf-https':
+      ensureFileExistence('./.env');
       // eslint-disable-next-line no-underscore-dangle
       stackObjects.__DEPLOY___ = '____________________________________________________________________________________________________________________________________________________________________________';
       envs.forEach((env) => {
