@@ -72,7 +72,7 @@ Once you've run the ```init``` with the right template, you will run ```npm run 
 ## Options
   - *ssl* 
     - The arn of the ssl cert that you want to use with cloudfront
-    - Example: arn:aws:acm:us-east-1:985732079875:certificate/7e8caf2d-af43-4659-a21a-5da6261489ed
+    - Example: arn:aws:acm:us-east-1:985732079875:certificate/XXXXXXXXXXXXXXXXX
   - *template*
     - The example 
     - Example: s3-cf-https

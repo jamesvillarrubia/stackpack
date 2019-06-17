@@ -43,8 +43,8 @@ async function checkS3forBucket(options, exit) {
           match = item;
         }
       });
-      if (!match) error(`No bucket found for environment: ${env}`, exit);
-      // console.log(item)
+      if (!match) error(`No bucket found for environment: ${env}`, false);
+      // console.log(match);
       return match;
     },
     (err) => {
@@ -62,20 +62,33 @@ async function createBucket(options, exit) {
   const credentials = new AWS.SharedIniFileCredentials({ profile });
   AWS.config.credentials = credentials;
   const s3 = new AWS.S3();
+
   const promise = s3.createBucket({
     Bucket: `${env}-${domain}`,
     ACL: 'public-read',
-    Policy: JSON.stringify(defaultPolicy)
+    // Policy: JSON.stringify(defaultPolicy)
   }).promise();
-  // console.log(env, domain)
+  defaultPolicy.Statement[0].Resource = [`arn:aws:s3:::${env}-${domain}/*`];
+
   return promise.then(
     (data) => {
-      console.log('createBucket', data);
-      /* process the data */
+      // console.log('createBucket', data);
+      // console.log(defaultPolicy);
+      const promise2 = s3.putBucketPolicy({
+        Bucket: `${env}-${domain}`,
+        Policy: JSON.stringify(defaultPolicy)
+      }).promise();
+
+      return promise2.then(
+        (data2) => {
+          // console.log('createBucketPolicy', data2);
+        },
+        (err) => {
+          error(JSON.stringify(err, err.stack), exit);
+        }
+      );
     },
     (err) => {
-      /* handle the error */
-      // console.log(err, err.stack);
       error(JSON.stringify(err, err.stack), exit);
     }
   ).catch(err => error(JSON.stringify(err, err.stack), exit));
@@ -87,7 +100,7 @@ async function putBucketWebsite(options, exit) {
   const credentials = new AWS.SharedIniFileCredentials({ profile });
   AWS.config.credentials = credentials;
   const s3 = new AWS.S3();
-  const promise = s3.createBucket({
+  const promise = s3.putBucketWebsite({
     Bucket: `${env}-${domain}`,
     ContentMD5: '',
     WebsiteConfiguration: {
@@ -133,6 +146,7 @@ async function sendToBucket(options = {}) {
       Bucket: `${env}-${domain}`,
     }
   };
+  // console.log(params);
   const uploader = client.uploadDir(params);
   uploader.on('error', (err) => {
     console.error('unable to sync:', err.stack);
@@ -159,9 +173,12 @@ module.exports = async () => {
   options.cf_envs = options.cf_envs || [];
 
   const bucket = await checkS3forBucket(options, 1);
+  console.log('bucket', bucket);
+  // // eslint-disable-next-line no-constant-condition
   if (!bucket) {
     await createBucket(options, 1);
     await putBucketWebsite(options, 1);
+  // sendToBucket(options);
   }
   sendToBucket(options);
 };

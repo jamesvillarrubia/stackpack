@@ -1,3 +1,6 @@
+/* eslint-disable prefer-const */
+/* eslint-disable no-unused-vars */
+/* eslint-disable camelcase */
 /* eslint-disable no-shadow */
 /* eslint-disable no-console */
 
@@ -11,23 +14,26 @@ const defaultConfig = require('../templates/s3-cf-https_default-config.json');
 const ensureDirectoryExistence = require('../utils/dir-exists');
 
 
-function checkProps(array, object) {
+function checkProps(array, object, funcName = '') {
   array.forEach((a) => {
     // eslint-disable-next-line no-prototype-builtins
     if (!object.hasOwnProperty(a)) {
-      error(`Config or flags must include the ${a} property.`);
+      error(`${funcName} - Config or flags must include the ${a} property.`);
     }
   });
 }
 
 
-async function createCloudfrontFromConfig(options) {
-  checkProps(['profile', 'env', 'ssl', 'rootenv', 'template'], options);
+async function createCloudfrontFromConfig(options, env) {
+  checkProps(['profile', 'domain', 'rootenv', 'template'], options, 'createCloudfrontFromConfig');
+  if (!env) {
+    error('createCloudfrontFromConfig must include an env', true);
+  }
   let {
     ssl
   } = options;
   const {
-    profile, env, rootenv, template
+    profile, rootenv, domain, template
   } = options;
 
   ssl = ssl || null;
@@ -41,15 +47,15 @@ async function createCloudfrontFromConfig(options) {
 
   // env = `fake14${env}`
   // adjust default
-  newConfig.CallerReference = `${env}-${root}`;
-  newConfig.Aliases.Items[0] = `${env}-${root}`;
+  newConfig.CallerReference = `${env}-${domain}`;
+  newConfig.Aliases.Items[0] = `${env}-${domain}`;
   if (env === rootenv) {
     newConfig.Aliases.Quantity = 2;
-    newConfig.Aliases.push(root);
+    newConfig.Aliases.Items.push(domain);
   }
-  newConfig.Origins.Items[0].Id = `S3-${env}-${root}`;
-  newConfig.Origins.Items[0].DomainName = (`${env}-${root}.s3.amazonaws.com`);
-  newConfig.DefaultCacheBehavior.TargetOriginId = `S3-${env}-${root}`;
+  newConfig.Origins.Items[0].Id = `S3-${env}-${domain}`;
+  newConfig.Origins.Items[0].DomainName = (`${env}-${domain}.s3.amazonaws.com`);
+  newConfig.DefaultCacheBehavior.TargetOriginId = `S3-${env}-${domain}`;
   if (ssl) {
     newConfig.ViewerCertificate.Certificate = `${ssl}`;
   } else {
@@ -58,10 +64,11 @@ async function createCloudfrontFromConfig(options) {
   }
 
   // adjust default
-  const promise = cloudfront.createDistribution({ DistributionConfig: newConfig }).promise();
-
-  const out = await promise.then(
-    data => data.Distribution,
+  const out = await cloudfront.createDistribution({ DistributionConfig: newConfig }).promise().then(
+    (data) => {
+      console.log(`    Distribution rolling for ${env}-${domain}`);
+      return data.Distribution;
+    },
     (err) => {
       /* handle the error */
       // console.log(err, err.stack);
@@ -77,7 +84,7 @@ async function createCloudfrontFromConfig(options) {
 
 
 async function invalidate(options, exit) {
-  checkProps(['profile', 'env', 'template'], options);
+  checkProps(['profile', 'env', 'template'], options, 'invalidate');
   const { profile, env, template } = options;
   const credentials = new AWS.SharedIniFileCredentials({ profile });
   AWS.config.credentials = credentials;
@@ -109,7 +116,7 @@ async function invalidate(options, exit) {
 }
 
 function getConfigByDomain(options, exit) {
-  checkProps(['profile', 'env'], options);
+  checkProps(['profile', 'env'], options, 'getConfigByDomain');
   const { profile, env, domain } = options;
   // console.log(profile)
   const credentials = new AWS.SharedIniFileCredentials({ profile });
@@ -145,27 +152,26 @@ function getConfigByDomain(options, exit) {
 }
 
 async function refreshLocalConfig(options, exit) {
-  checkProps(['ssl', 'rootenv', 'template'], options);
-  const { _env, template } = options;
-  let { cfEnvs } = options;
+  checkProps(['ssl', 'rootenv', 'template'], options, 'refreshLocalConfig');
+  console.log('\n\nRefreshing local Cloudfront configs...');
+  let { env, cf_envs, template } = options;
   // console.log(cf_envs)
-  if (_env) { cfEnvs = [_env]; }
-  // console.log(cf_envs)
-  return cfEnvs.map(async (env) => {
-    // console.log(env)
+  if (env) { cf_envs = [env]; }
+  // console.log(cf_envs);
+  return Promise.all(cf_envs.map(async (env) => {
+    console.log('    refreshing... ', env);
     const out = await getConfigByDomain({ ...options, env }, exit)
       .catch(err => error(JSON.stringify(err, err.stack), exit));
-    // const id = out.Id;
     if (out) {
       ensureDirectoryExistence(`.stackpack/${template}/cloudfront-config-${env}.json`);
       fs.writeFileSync(`.stackpack/${template}/cloudfront-config-${env}.json`, JSON.stringify(out));
     }
-    return out;
-  });
+    return { env, config: out };
+  }));
 }
 
 async function updateConfigFromLocal(options, exit) {
-  checkProps(['profile', 'env', 'template'], options);
+  checkProps(['profile', 'env', 'template'], options, 'updateConfigFromLocal');
   const { profile, env, template } = options;
   const credentials = new AWS.SharedIniFileCredentials({ profile });
   AWS.config.credentials = credentials;
@@ -190,25 +196,18 @@ async function updateConfigFromLocal(options, exit) {
 }
 
 async function setup(options) {
-  checkProps(['profile', 'domain'], options);
-  const {
-    profile, domain, cfEnvs
-  } = options;
-
-  const configs = cfEnvs.map(env => refreshLocalConfig(profile, domain, env)
-    .then((config) => {
-      if (!config.Id) {
-        return createCloudfrontFromConfig(options)
-          .then(config => Promise.resolve({ [env]: config.Id }));
-      }
-      return Promise.resolve({ [env]: config.Id });
-    }));
-  return Promise.all(configs)
-    .then((configs) => {
-      console.log('Cloudfront Setup deploying...');
-      console.log(configs);
-      return configs;
-    });
+  checkProps(['profile', 'domain'], options, 'setup');
+  // console.log(options);
+  const configs = await refreshLocalConfig(options);
+  // console.log(configs);
+  return Promise.all(configs.map((obj) => {
+    if (!obj.config || !obj.config.Id) {
+      return createCloudfrontFromConfig(options, obj.env);
+    }
+    return Promise.resolve({});
+  })).then(() => {
+    console.log('    Refreshing and Creation is complete.\n');
+  });
 }
 
 module.exports = () => {
