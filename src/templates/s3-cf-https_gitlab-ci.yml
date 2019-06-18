@@ -1,0 +1,70 @@
+image: lambci/lambda:build-nodejs8.10
+
+before_script:
+  - aws configure set aws_access_key_id $GL_AWS_ACCESS_KEY_ID --profile default
+  - aws configure set aws_secret_access_key $GL_AWS_SECRET_ACCESS_KEY --profile default
+  - aws configure set preview.cloudfront true
+  - BRANCH=$CI_COMMIT_REF_NAME; if [ $BRANCH == 'master' ]; then BRANCH=prod; fi;
+
+stages:
+  - config
+  - build
+  - test
+  - deploy
+  - version
+
+# ---------------------  CONFIG
+config:
+  stage: config
+  script:
+    - npm install semver -g
+    - npm install stackpack@latest
+    - ./node_modules/.bin/stackpack shell gitlab-skip
+    - npm install
+  artifacts:
+    untracked: true
+    paths:
+      - .stackpack/
+      - node_modules/
+
+# ---------------------  BUILD
+build:
+  stage: build
+  script:
+    - ls -la
+    - cd .stackpack; ls -la; cd ..;
+    - unset CI #
+    - ./node_modules/.bin/stackpack build --env $BRANCH --profile default
+  artifacts:
+    paths:
+      - .stackpack/
+      - node_modules/
+  dependencies:
+    - config
+
+test:
+  stage: test
+  script:
+    - ./node_modules/.bin/env-cmd -f ./.env.test npm run test
+  dependencies:
+    - config
+    - build
+
+deploy:
+  stage: deploy
+  script:
+    - ./node_modules/.bin/stackpack deploy --env $BRANCH --profile default
+    - ./node_modules/.bin/stackpack cf invalidate --env $BRANCH --profile default
+  dependencies:
+    - config
+    - build
+
+version:
+  stage: version
+  script:
+    - npm install semver -g
+    - git remote -v
+    - echo "$CI_REPOSITORY_URL"
+    - ./node_modules/.bin/stackpack shell semver
+  only:
+    - master
