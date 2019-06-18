@@ -28,7 +28,7 @@ module.exports = async () => {
 
   ensureDirectoryExistence(`./.stackpack/builds/${env}/`);
 
-  shell.exec(`./node_modules/.bin/env-cmd -f ./.env.${options.env} ./node_modules/.bin/react-scripts build; rm -r ./.stackpack/builds/${env}; mv build ./.stackpack/builds/${env}/`);
+  shell.exec(`./node_modules/stackpack/node_modules/.bin/env-cmd -f ./.env.${options.env} ./node_modules/.bin/react-scripts build; rm -r ./.stackpack/builds/${env}; mv build ./.stackpack/builds/${env}/`);
 
   // eslint-disable-next-line no-console
   console.log(`\nBuild created in .stackpack/builds/${env}\n`);

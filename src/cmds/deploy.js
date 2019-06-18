@@ -71,7 +71,7 @@ async function createBucket(options, exit) {
   defaultPolicy.Statement[0].Resource = [`arn:aws:s3:::${env}-${domain}/*`];
 
   return promise.then(
-    (data) => {
+    () => {
       // console.log('createBucket', data);
       // console.log(defaultPolicy);
       const promise2 = s3.putBucketPolicy({
@@ -80,7 +80,7 @@ async function createBucket(options, exit) {
       }).promise();
 
       return promise2.then(
-        (data2) => {
+        () => {
           // console.log('createBucketPolicy', data2);
         },
         (err) => {
